@@ -42,83 +42,83 @@ dealHand :: Deck -> IO ()
 dealHand inDeck = do
    -- make random generator
    rng <- newStdGen
+
    -- shuffle
    let deck = shuffleDeck rng inDeck
+
    -- dealers hand
    -- get first card
-   let deal_dealer1 = dealCard deck
-   let card_dealer1 = fst deal_dealer1
-   let deck_dealer1 = snd deal_dealer1 -- new deck
+   let card1 = head deck
+   let deck1 = tail deck -- new deck
    -- get second card
-   let deal_dealer2 = dealCard deck_dealer1
-   let card_dealer2 = fst deal_dealer2
-   let deck_dealer2 = snd deal_dealer2 -- new deck
+   let card2 = head deck1
+   let deck2 = tail deck1 -- new deck
    -- and the dealers hand is
-   let dealers_hand = [card_dealer1, card_dealer2]
-   print ("Dealers first card is: " ++ show card_dealer1)
+   let dealers_hand = [card1, card2]
+
+   print ("Dealers faced up card is: " ++ show (cType card1))
+
    -- get first cards
-   let deal1 = dealCard deck_dealer2
-   let card1 = fst deal1
-   let deck1 = snd deal1 -- new deck
+   let card3 = head deck2
+   let deck3 = tail deck2 -- new deck
    -- get second card
-   let deal2 = dealCard deck1
-   let card2 = fst deal2
-   let deck2 = snd deal2 -- new deck
+   let card4 = head deck3
+   let deck4 = tail deck3 -- new deck
    let base = [card1, card2]
+
    -- Enter draw loop
    drawLoop base dealers_hand deck2
+
    print "Finished"
 
-drawLoop :: Hand -> Hand -> Deck -> IO (Int, Deck)
+drawLoop :: Hand -> Hand -> Deck -> IO (undefined)
 drawLoop hand dealers_hand inDeck = do
-   let sum = sumOfHand hand
+   let inSum = sumOfHand hand
    -- Pre draw next card
-   let deal = dealCard inDeck
-   let card = fst deal
-   let deck = snd deal
-   if sum == 21 
+   let card = head inDeck
+   let deck = tail inDeck
+   let status = show (map cType hand) ++ " " ++ show inSum
+   if inSum > 21 
       then do
-         print "Blackjack!"
-         exitSuccess
+         print ("You lost: " ++ status) 
+         exitFailure
       else 
-         if sum > 21 
-            then do
-               print ("You lost: " ++ show sum) 
-               exitFailure
-            else 
-               print ("Current hand: " ++ show sum)
+         print ("Current hand: " ++ status)
    print "Draw another card?"
    continue <- getLine
    case continue of
       "y"       -> drawLoop (hand ++ [card]) dealers_hand deck
-      otherwise -> do
-         -- dealer take another
-         if sumOfHand dealers_hand < 18 then do
-            let deal_dealer3 = dealCard deck
-            let card_dealer3 = fst deal_dealer3
-            let deck_dealer3 = snd deal_dealer3
-            let dealers_newHand = dealers_hand ++ [card_dealer3]
-            print ("Dealers new hand: " ++ show (sumOfHand dealers_newHand))
-            let dealers_sum = sumOfHand dealers_newHand
-            if sum <= dealers_sum && dealers_sum <=21 then do
-               print "You lost"
+      otherwise -> dealerLoop inSum dealers_hand deck
+
+dealerLoop :: Int -> Hand -> Deck -> IO (undefined)
+dealerLoop inSum dealers_hand deck = do
+   -- dealer take another until
+   if sumOfHand dealers_hand < inSum then do
+      let card1 = head deck
+      let deck1 = tail deck
+      let dealers_newHand = dealers_hand ++ [card1]
+      print ("Dealers new hand: " ++ show (sumOfHand dealers_newHand))
+      let dealers_sum = sumOfHand dealers_newHand
+      if inSum <= dealers_sum && dealers_sum <= 21 then do
+         print "You lost"
+         exitFailure
+         else
+            dealerLoop inSum dealers_newHand deck1
+      else do
+         let dealers_sum = sumOfHand dealers_hand
+         if dealers_sum == inSum
+            then do
+               print ("You loose! Dealer had " ++ show (map cType dealers_hand) ++ show dealers_sum)
                exitFailure
                else do
                   print "You won!"
                   exitSuccess
-            else do
-               print "You won!"
-               exitSuccess
 
 shuffleDeck :: StdGen -> Deck -> Deck
 shuffleDeck _ [] = []
 shuffleDeck gen xs = let (n,newGen) = randomR (0,length xs -1) gen
                          front = xs !! n
                      in  front : shuffleDeck newGen (take n xs ++ drop (n+1) xs)
-
-dealCard :: Deck -> (Card, Deck)
-dealCard []     = error "Can't pop from an empty stack!"
-dealCard (card:deck) = (card, deck)
 
 sumOfHand :: Hand -> Int
 sumOfHand hand   = if total == 11 && hasAce then 21 else total
@@ -208,7 +208,7 @@ prop_deck_size = length defaultDeck == 52
 
 -- Hello World
 exeMain = do
-    putStrLn (hello "World")
+    dealHand defaultDeck
 
 -- Entry point for unit tests.
 testMain = do
