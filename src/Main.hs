@@ -75,7 +75,7 @@ drawLoop hand dealers_hand inDeck = do
    -- Pre draw next card
    let card = head inDeck
    let deck = tail inDeck
-   let status = show (map cType hand) ++ " " ++ show inSum
+   let status = showStatus hand
    if inSum > 21 
       then do
          print ("You lost: " ++ status) 
@@ -98,7 +98,7 @@ dealerLoop inSum dealers_hand deck = do
       let dealers_sum = sumOfHand dealers_newHand
       print ("Dealers new hand: " ++ show dealers_sum)
       if inSum <= dealers_sum && dealers_sum <= 21 then do
-         print ("You loose. Dealer had "  ++ show (map cType dealers_newHand) ++ show dealers_sum)
+         print ("You loose. Dealer had "  ++ showStatus dealers_newHand)
          playAgain deck1
          else
             dealerLoop inSum dealers_newHand deck1
@@ -106,7 +106,7 @@ dealerLoop inSum dealers_hand deck = do
          let dealers_sum = sumOfHand dealers_hand
          if dealers_sum == inSum
             then do
-               print ("You loose! Dealer had " ++ show (map cType dealers_hand) ++ show dealers_sum)
+               print ("You loose! Dealer had " ++ showStatus dealers_hand)
                playAgain deck
                else do
                   print "You won!"
@@ -119,6 +119,9 @@ playAgain deck = do
    case continue of
       "y"       -> dealHand deck
       otherwise -> undefined
+
+showStatus :: Hand -> String
+showStatus hand = show (map cType hand) ++ " " ++ show (sumOfHand hand)
 
 shuffleDeck :: StdGen -> Deck -> Deck
 shuffleDeck _ [] = []
