@@ -38,7 +38,7 @@ data CType = Ace | Two | Three | Four | Five | Six | Seven | Eight | Nine | Ten 
 
 type Hand = [Card]
 
-dealHand :: Deck -> IO ()
+dealHand :: Deck -> IO (undefined)
 dealHand inDeck = do
    -- make random generator
    rng <- newStdGen
@@ -79,14 +79,14 @@ drawLoop hand dealers_hand inDeck = do
    if inSum > 21 
       then do
          print ("You lost: " ++ status) 
-         exitFailure
-      else 
+         playAgain deck
+      else do
          print ("Current hand: " ++ status)
-   print "Draw another card?"
-   continue <- getLine
-   case continue of
-      "y"       -> drawLoop (hand ++ [card]) dealers_hand deck
-      otherwise -> dealerLoop inSum dealers_hand deck
+         print "Draw another card?"
+         continue <- getLine
+         case continue of
+            "y"       -> drawLoop (hand ++ [card]) dealers_hand deck
+            otherwise -> dealerLoop inSum dealers_hand deck
 
 dealerLoop :: Int -> Hand -> Deck -> IO (undefined)
 dealerLoop inSum dealers_hand deck = do
@@ -99,7 +99,7 @@ dealerLoop inSum dealers_hand deck = do
       let dealers_sum = sumOfHand dealers_newHand
       if inSum <= dealers_sum && dealers_sum <= 21 then do
          print "You lost"
-         exitFailure
+         playAgain deck1
          else
             dealerLoop inSum dealers_newHand deck1
       else do
@@ -107,10 +107,18 @@ dealerLoop inSum dealers_hand deck = do
          if dealers_sum == inSum
             then do
                print ("You loose! Dealer had " ++ show (map cType dealers_hand) ++ show dealers_sum)
-               exitFailure
+               playAgain deck
                else do
                   print "You won!"
-                  exitSuccess
+                  playAgain deck
+
+playAgain :: Deck -> IO (undefined) 
+playAgain deck = do 
+   print "Play again?"
+   continue <- getLine
+   case continue of
+      "y"       -> dealHand deck
+      otherwise -> undefined
 
 shuffleDeck :: StdGen -> Deck -> Deck
 shuffleDeck _ [] = []
