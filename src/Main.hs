@@ -69,8 +69,6 @@ dealHand inDeck = do
    -- Enter draw loop
    drawLoop base dealers_hand deck2
 
-   print "Finished"
-
 drawLoop :: Hand -> Hand -> Deck -> IO (undefined)
 drawLoop hand dealers_hand inDeck = do
    let inSum = sumOfHand hand
