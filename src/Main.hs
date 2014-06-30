@@ -95,10 +95,10 @@ dealerLoop inSum dealers_hand deck = do
       let card1 = head deck
       let deck1 = tail deck
       let dealers_newHand = dealers_hand ++ [card1]
-      print ("Dealers new hand: " ++ show (sumOfHand dealers_newHand))
       let dealers_sum = sumOfHand dealers_newHand
+      print ("Dealers new hand: " ++ show dealers_sum)
       if inSum <= dealers_sum && dealers_sum <= 21 then do
-         print "You lost"
+         print ("You loose. Dealer had "  ++ show (map cType dealers_newHand) ++ show dealers_sum)
          playAgain deck1
          else
             dealerLoop inSum dealers_newHand deck1
