@@ -18,25 +18,22 @@ module Main (
 ) where
 
 import Control.Monad (unless)
-import Data.List (stripPrefix, length)
-import System.Exit (exitFailure)
 import Test.QuickCheck.All (quickCheckAll)
 import System.Random
-import Control.Applicative
 import System.Exit
 
 type Deck = [Card]
 
-data Card = Card {cSuit :: CSuit
-                 ,cType :: CType 
-                 }
-                 deriving Show
+data Card = Card {cSuit :: CSuit, cValue :: CValue} deriving Show
 
 data CSuit = Spades | Hearts | Diamonds | Clubs deriving (Show, Enum, Eq)
 
-data CType = Ace | Two | Three | Four | Five | Six | Seven | Eight | Nine | Ten | Jack | Queen | King deriving (Show, Enum, Eq)
+data CValue = Ace | Two | Three | Four | Five | Six | Seven | Eight | Nine | Ten | Jack | Queen | King deriving (Show, Enum, Eq)
 
 type Hand = [Card]
+
+defaultDeck :: Deck
+defaultDeck = [Card suit value | suit <- [Spades .. Clubs], value <- [Ace .. King]]
 
 dealHand :: Deck -> IO (undefined)
 dealHand inDeck = do
@@ -56,7 +53,7 @@ dealHand inDeck = do
    -- and the dealers hand is
    let dealers_hand = [card1, card2]
 
-   print ("Dealers faced up card is: " ++ show (cType card1))
+   print ("Dealers faced up card is: " ++ show (cValue card1))
 
    -- get first cards
    let card3 = head deck2
@@ -64,10 +61,10 @@ dealHand inDeck = do
    -- get second card
    let card4 = head deck3
    let deck4 = tail deck3 -- new deck
-   let base = [card1, card2]
+   let base = [card3, card4]
 
    -- Enter draw loop
-   drawLoop base dealers_hand deck2
+   drawLoop base dealers_hand deck4
 
 drawLoop :: Hand -> Hand -> Deck -> IO (undefined)
 drawLoop hand dealers_hand inDeck = do
@@ -86,7 +83,7 @@ drawLoop hand dealers_hand inDeck = do
          continue <- getLine
          case continue of
             "y"       -> drawLoop (hand ++ [card]) dealers_hand deck
-            otherwise -> dealerLoop inSum dealers_hand deck
+            otherwise -> dealerLoop inSum dealers_hand deck 
 
 dealerLoop :: Int -> Hand -> Deck -> IO (undefined)
 dealerLoop inSum dealers_hand deck = do
@@ -121,7 +118,7 @@ playAgain deck = do
       otherwise -> undefined
 
 showStatus :: Hand -> String
-showStatus hand = show (map cType hand) ++ " " ++ show (sumOfHand hand)
+showStatus hand = show (map cValue hand) ++ " " ++ show (sumOfHand hand)
 
 shuffleDeck :: StdGen -> Deck -> Deck
 shuffleDeck _ [] = []
@@ -132,7 +129,7 @@ shuffleDeck gen xs = let (n,newGen) = randomR (0,length xs -1) gen
 sumOfHand :: Hand -> Int
 sumOfHand hand   = if total == 11 && hasAce then 21 else total
    where  total  = sum $ map getValue hand
-          hasAce = 0 < (length $ filter (\card -> (cType card) == Ace) hand)
+          hasAce = 0 < (length $ filter (\card -> (cValue card) == Ace) hand)
 
 getValue :: Card -> Int
 getValue (Card _ King) = 10
@@ -148,72 +145,6 @@ getValue (Card _ Four) = 4
 getValue (Card _ Three) = 3
 getValue (Card _ Two) = 2
 getValue (Card _ Ace) = 1
-
-
-defaultDeck :: Deck
-defaultDeck = [Card Spades King
-         ,Card Spades Queen
-         ,Card Spades Jack
-         ,Card Spades Ten
-         ,Card Spades Nine
-         ,Card Spades Eight
-         ,Card Spades Seven
-         ,Card Spades Six
-         ,Card Spades Five
-         ,Card Spades Four
-         ,Card Spades Three
-         ,Card Spades Two
-         ,Card Spades Ace
-         ,Card Hearts King
-         ,Card Hearts Queen
-         ,Card Hearts Jack
-         ,Card Hearts Ten
-         ,Card Hearts Nine
-         ,Card Hearts Eight
-         ,Card Hearts Seven
-         ,Card Hearts Six
-         ,Card Hearts Five
-         ,Card Hearts Four
-         ,Card Hearts Three
-         ,Card Hearts Two
-         ,Card Hearts Ace
-         ,Card Clubs King
-         ,Card Clubs Queen
-         ,Card Clubs Jack
-         ,Card Clubs Ten
-         ,Card Clubs Nine
-         ,Card Clubs Eight
-         ,Card Clubs Seven
-         ,Card Clubs Six
-         ,Card Clubs Five
-         ,Card Clubs Four
-         ,Card Clubs Three
-         ,Card Clubs Two
-         ,Card Clubs Ace
-         ,Card Diamonds King
-         ,Card Diamonds Queen
-         ,Card Diamonds Jack
-         ,Card Diamonds Ten
-         ,Card Diamonds Nine
-         ,Card Diamonds Eight
-         ,Card Diamonds Seven
-         ,Card Diamonds Six
-         ,Card Diamonds Five
-         ,Card Diamonds Four
-         ,Card Diamonds Three
-         ,Card Diamonds Two
-         ,Card Diamonds Ace
-         ]
-
-
--- Simple function to create a hello message.
-hello s = "Hello " ++ s
-
--- Tell QuickCheck that if you strip "Hello " from the start of
--- hello s you will be left with s (for any s).
-prop_hello s = stripPrefix "Hello " (hello s) == Just s
-
-prop_deck_size = length defaultDeck == 52
 
 -- Hello World
 exeMain = do
