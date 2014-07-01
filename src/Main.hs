@@ -26,14 +26,14 @@ type Deck = [Card]
 
 data Card = Card {cSuit :: CSuit, cValue :: CValue} deriving Show
 
-data CSuit = Spades | Hearts | Diamonds | Clubs deriving (Show, Enum, Eq)
+data CSuit = Spades | Hearts | Diamonds | Clubs deriving (Show, Enum, Eq, Bounded)
 
-data CValue = Ace | Two | Three | Four | Five | Six | Seven | Eight | Nine | Ten | Jack | Queen | King deriving (Show, Enum, Eq)
+data CValue = Ace | Two | Three | Four | Five | Six | Seven | Eight | Nine | Ten | Jack | Queen | King deriving (Show, Enum, Eq, Bounded)
 
 type Hand = [Card]
 
 defaultDeck :: Deck
-defaultDeck = [Card suit value | suit <- [Spades .. Clubs], value <- [Ace .. King]]
+defaultDeck = [Card suit value | suit <- [(minBound :: CSuit) ..], value <- [(minBound :: CValue) ..]]
 
 dealHand :: Deck -> IO (undefined)
 dealHand inDeck = do
