@@ -84,7 +84,7 @@ drawLoop hand dealers_hand inDeck = do
          continue <- getLine
          case continue of
             "y"       -> drawLoop (hand ++ [card]) dealers_hand deck
-            otherwise -> dealerLoop inSum dealers_hand deck 
+            _ -> dealerLoop inSum dealers_hand deck 
  
 dealerLoop :: Int -> Hand -> Deck -> IO undefined
 dealerLoop inSum dealers_hand deck =
@@ -117,7 +117,7 @@ playAgain deck = do
   continue <- getLine
   case continue of
      "y"        -> dealHand deck
-     otherwise  -> undefined
+     _  -> undefined
 
 showStatus :: Hand -> String 
 showStatus hand = show (map cValue hand) ++ " " ++ show (sumOfHand hand)
@@ -149,9 +149,11 @@ getValue (Card _ Two) = 2
 getValue (Card _ Ace) = 1
 
 -- Hello World
+exeMain :: IO undefined
 exeMain = dealHand defaultDeck
 
 -- Entry point for unit tests.
+testMain :: IO()
 testMain = do
     allPass <- $quickCheckAll -- Run QuickCheck on all prop_ functions
     unless allPass exitFailure
@@ -163,5 +165,6 @@ testMain = do
 #ifndef MAIN_FUNCTION
 #define MAIN_FUNCTION exeMain
 #endif
+main :: IO()
 main = MAIN_FUNCTION
 
